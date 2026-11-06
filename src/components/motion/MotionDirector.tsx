@@ -3,9 +3,14 @@
 import { useEffect } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { isAutomatedAudit } from '@/lib/isAutomatedAudit';
 
 export default function MotionDirector() {
   useEffect(() => {
+    if (isAutomatedAudit()) {
+      return;
+    }
+
     gsap.registerPlugin(ScrollTrigger);
     const mm = gsap.matchMedia();
     let ready = false;

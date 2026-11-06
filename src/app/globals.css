@@ -1509,6 +1509,8 @@ h3 {
    04 / ABOUT — Heritage Editorial Portrait
    ========================================== */
 .about {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 800px;
   display: grid;
   grid-template-columns: 0.95fr 1.3fr;
   gap: clamp(40px, 6vw, 76px);
@@ -1604,6 +1606,8 @@ h3 {
    05 / PROCESS — Deep Midnight Triptych
    ========================================== */
 .process {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 800px;
   background: #132336;
   color: var(--ivory);
   border-top: 2px solid var(--ink);
@@ -1681,6 +1685,8 @@ h3 {
    FINAL CTA — Dominant Terracotta Stage
    ========================================== */
 .final-cta {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 600px;
   position: relative;
   isolation: isolate;
   overflow: hidden;
@@ -1805,6 +1811,8 @@ h3 {
    FOOTER — Monumental Signature
    ========================================== */
 .footer {
+  content-visibility: auto;
+  contain-intrinsic-size: 1px 700px;
   background: #0b1623;
   color: var(--ivory);
   border-top: 2px solid var(--ink);

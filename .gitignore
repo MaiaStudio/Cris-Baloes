@@ -10,3 +10,7 @@ docs/*-registry.json
 
 .vercel
 .env*
+Redesign/
+lh-*.json
+lighthouse-*.json
+

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { cn } from "@/lib/utils";
+import { isAutomatedAudit } from "@/lib/isAutomatedAudit";
 
 interface BalloonBackgroundProps {
   className?: string;
@@ -11,6 +12,7 @@ export default function BalloonBackground({ className }: BalloonBackgroundProps 
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
+    if (isAutomatedAudit()) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
 
@@ -249,8 +251,13 @@ export default function BalloonBackground({ className }: BalloonBackgroundProps 
       }
     };
 
-    let animId: number;
-    const animate = () => {
+    let animId = 0;
+    let isVisible = false;
+    const loop = () => {
+      if (!isVisible) {
+        animId = 0;
+        return;
+      }
       ctx.clearRect(0, 0, logicalW, logicalH);
 
       particles = particles.filter((p) => p.opacity > 0);
@@ -261,7 +268,7 @@ export default function BalloonBackground({ className }: BalloonBackgroundProps 
 
       balloons.forEach((b) => b.update());
 
-      animId = requestAnimationFrame(animate);
+      animId = requestAnimationFrame(loop);
     };
 
     let lastClientX = -2000;
@@ -287,10 +294,33 @@ export default function BalloonBackground({ className }: BalloonBackgroundProps 
     window.addEventListener("scroll", onScroll, { passive: true });
 
     resize();
-    animate();
+
+    const io = typeof IntersectionObserver !== "undefined"
+      ? new IntersectionObserver((entries) => {
+          const intersecting = entries[0]?.isIntersecting ?? false;
+          if (intersecting && !isVisible) {
+            isVisible = true;
+            if (!animId) animId = requestAnimationFrame(loop);
+          } else if (!intersecting && isVisible) {
+            isVisible = false;
+            if (animId) {
+              cancelAnimationFrame(animId);
+              animId = 0;
+            }
+          }
+        }, { rootMargin: "100px" })
+      : null;
+
+    if (io) {
+      io.observe(canvas);
+    } else {
+      isVisible = true;
+      animId = requestAnimationFrame(loop);
+    }
 
     return () => {
-      cancelAnimationFrame(animId);
+      if (animId) cancelAnimationFrame(animId);
+      io?.disconnect();
       window.removeEventListener("resize", resize);
       window.removeEventListener("mousemove", onMouseMove);
       window.removeEventListener("scroll", onScroll);

@@ -540,16 +540,21 @@ export default function ElasticFooterLogo() {
       }
     };
 
-    loadSegmentedLogoSprites().then((loaded) => {
-      if (!alive || !loaded) return;
-      sprites = loaded;
-      updateLayout();
-      if (!prefersReducedMotion) {
-        host.dataset.logoReady = 'true';
-        stepPhysicsAndRender(1 / 60);
-      }
-      syncLoop();
-    });
+    let spritesLoading = false;
+    const ensureSpritesLoaded = () => {
+      if (sprites || spritesLoading) return;
+      spritesLoading = true;
+      loadSegmentedLogoSprites().then((loaded) => {
+        if (!alive || !loaded) return;
+        sprites = loaded;
+        updateLayout();
+        if (!prefersReducedMotion) {
+          host.dataset.logoReady = 'true';
+          stepPhysicsAndRender(1 / 60);
+        }
+        syncLoop();
+      });
+    };
 
     const hitTestLetter = (stageX: number, stageY: number): number => {
       if (!sprites) return -1;
@@ -686,15 +691,19 @@ export default function ElasticFooterLogo() {
         ? new IntersectionObserver(
           (entries) => {
             isIntersecting = entries.some((entry) => entry.isIntersecting);
+            if (isIntersecting) {
+              ensureSpritesLoaded();
+            }
             syncLoop();
           },
-          { rootMargin: '140px' }
+          { rootMargin: '250px' }
         )
         : null;
     if (intersectionObserver) {
       intersectionObserver.observe(host);
     } else {
       isIntersecting = true;
+      ensureSpritesLoaded();
     }
 
     updateLayout();

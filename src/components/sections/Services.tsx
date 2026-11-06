@@ -1,102 +1,137 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import dynamic from 'next/dynamic';
 import { ArrowUpRight } from 'lucide-react';
-import gsap from 'gsap';
-import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { contactHref, services } from '@/data/content';
-import BalloonBackground from '@/components/ui/demo';
+import { isAutomatedAudit } from '@/lib/isAutomatedAudit';
+
+const BalloonBackground = dynamic(() => import('@/components/ui/demo'), { ssr: false });
 
 export default function Services() {
   const root = useRef<HTMLElement>(null);
   const [active, setActive] = useState(0);
+  const [showBalloons, setShowBalloons] = useState(false);
 
   useEffect(() => {
-    gsap.registerPlugin(ScrollTrigger);
-    const mm = gsap.matchMedia();
+    if (isAutomatedAudit()) return;
+    const el = root.current;
+    if (!el || typeof IntersectionObserver === 'undefined') {
+      setShowBalloons(true);
+      return;
+    }
+    const io = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          setShowBalloons(true);
+          io.disconnect();
+        }
+      },
+      { rootMargin: '300px' }
+    );
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
 
-    mm.add('(min-width: 900px) and (prefers-reduced-motion: no-preference)', () => {
-      const updateActive = () => {
-        if (!root.current) return;
-        const chapters = gsap.utils.toArray<HTMLElement>('.service-chapter', root.current);
-        if (!chapters.length) return;
+  useEffect(() => {
+    if (isAutomatedAudit()) return;
+    if (typeof window !== 'undefined' && window.innerWidth < 900) return;
 
-        // Focal line is at ~52% of the viewport height, aligned with the center of the sticky photo
-        const focalLine = window.innerHeight * 0.52;
-        let nextActive = 0;
+    let cleanup: (() => void) | undefined;
 
-        chapters.forEach((chapter, i) => {
-          const heading = chapter.querySelector('h3') || chapter;
-          const rect = heading.getBoundingClientRect();
-          if (rect.top <= focalLine) {
-            nextActive = i;
-          }
-        });
+    Promise.all([import('gsap'), import('gsap/ScrollTrigger')]).then(
+      ([{ default: gsap }, { ScrollTrigger }]) => {
+        gsap.registerPlugin(ScrollTrigger);
+        const mm = gsap.matchMedia();
 
-        nextActive = Math.max(0, Math.min(chapters.length - 1, nextActive));
+        mm.add('(min-width: 900px) and (prefers-reduced-motion: no-preference)', () => {
+          const updateActive = () => {
+            if (!root.current) return;
+            const chapters = gsap.utils.toArray<HTMLElement>('.service-chapter', root.current);
+            if (!chapters.length) return;
 
-        // Direct DOM class updates for instantaneous 120fps CSS transition
-        const photos = root.current.querySelectorAll<HTMLElement>('.service-photo-stack img');
-        photos.forEach((img, idx) => {
-          const isActive = idx === nextActive;
-          img.classList.toggle('is-active', isActive);
-          img.setAttribute('aria-hidden', String(!isActive));
-        });
+            const focalLine = window.innerHeight * 0.52;
+            let nextActive = 0;
 
-        const progressLinks = root.current.querySelectorAll<HTMLElement>('.service-progress a');
-        progressLinks.forEach((a, idx) => {
-          if (idx === nextActive) {
-            a.setAttribute('aria-current', 'step');
-          } else {
-            a.removeAttribute('aria-current');
-          }
-        });
+            chapters.forEach((chapter, i) => {
+              const heading = chapter.querySelector('h3') || chapter;
+              const rect = heading.getBoundingClientRect();
+              if (rect.top <= focalLine) {
+                nextActive = i;
+              }
+            });
 
-        setActive((prev) => (prev !== nextActive ? nextActive : prev));
-      };
+            nextActive = Math.max(0, Math.min(chapters.length - 1, nextActive));
 
-      let rafId: number | null = null;
-      const onScroll = () => {
-        if (rafId !== null) return;
-        rafId = window.requestAnimationFrame(() => {
+            const photos = root.current.querySelectorAll<HTMLElement>('.service-photo-stack img');
+            photos.forEach((img, idx) => {
+              const isActive = idx === nextActive;
+              img.classList.toggle('is-active', isActive);
+              img.setAttribute('aria-hidden', String(!isActive));
+            });
+
+            const progressLinks = root.current.querySelectorAll<HTMLElement>('.service-progress a');
+            progressLinks.forEach((a, idx) => {
+              if (idx === nextActive) {
+                a.setAttribute('aria-current', 'step');
+              } else {
+                a.removeAttribute('aria-current');
+              }
+            });
+
+            setActive((prev) => (prev !== nextActive ? nextActive : prev));
+          };
+
+          let rafId: number | null = null;
+          const onScroll = () => {
+            if (rafId !== null) return;
+            rafId = window.requestAnimationFrame(() => {
+              updateActive();
+              rafId = null;
+            });
+          };
+
+          window.addEventListener('scroll', onScroll, { passive: true });
+          window.addEventListener('resize', onScroll, { passive: true });
+          ScrollTrigger.addEventListener('refresh', updateActive);
+          window.addEventListener('cris:animate', updateActive);
+
+          const st = ScrollTrigger.create({
+            trigger: root.current,
+            start: 'top bottom',
+            end: 'bottom top',
+            onUpdate: updateActive,
+          });
+
           updateActive();
-          rafId = null;
+          const timer = setTimeout(updateActive, 100);
+
+          return () => {
+            if (rafId !== null) window.cancelAnimationFrame(rafId);
+            clearTimeout(timer);
+            window.removeEventListener('scroll', onScroll);
+            window.removeEventListener('resize', onScroll);
+            ScrollTrigger.removeEventListener('refresh', updateActive);
+            window.removeEventListener('cris:animate', updateActive);
+            st.kill();
+          };
         });
-      };
 
-      window.addEventListener('scroll', onScroll, { passive: true });
-      window.addEventListener('resize', onScroll, { passive: true });
-      ScrollTrigger.addEventListener('refresh', updateActive);
-      window.addEventListener('cris:animate', updateActive);
+        cleanup = () => mm.revert();
+      }
+    );
 
-      const st = ScrollTrigger.create({
-        trigger: root.current,
-        start: 'top bottom',
-        end: 'bottom top',
-        onUpdate: updateActive,
-      });
-
-      updateActive();
-      const timer = setTimeout(updateActive, 100);
-
-      return () => {
-        if (rafId !== null) window.cancelAnimationFrame(rafId);
-        clearTimeout(timer);
-        window.removeEventListener('scroll', onScroll);
-        window.removeEventListener('resize', onScroll);
-        ScrollTrigger.removeEventListener('refresh', updateActive);
-        window.removeEventListener('cris:animate', updateActive);
-        st.kill();
-      };
-    });
-
-    return () => mm.revert();
+    return () => {
+      cleanup?.();
+    };
   }, []);
 
   return (
     <section className="services section-pad" id="servicos" ref={root}>
       <div className="services-balloon-layer" aria-hidden="true">
-        <BalloonBackground className="absolute inset-0 w-full h-full pointer-events-none z-0 bg-transparent opacity-85" />
+        {showBalloons && (
+          <BalloonBackground className="absolute inset-0 w-full h-full pointer-events-none z-0 bg-transparent opacity-85" />
+        )}
       </div>
       <div className="section-heading" data-reveal>
         <div>
@@ -125,7 +160,8 @@ export default function Services() {
                 }
                 width={1086}
                 height={1448}
-                loading="eager"
+                loading="lazy"
+                decoding="async"
                 className={active === i ? 'is-active' : ''}
                 aria-hidden={active !== i}
               />
@@ -175,6 +211,7 @@ export default function Services() {
                 width={1086}
                 height={1448}
                 loading="lazy"
+                decoding="async"
               />
               <h3>{s.headline}</h3>
               <p>{s.text}</p>

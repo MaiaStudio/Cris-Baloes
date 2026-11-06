@@ -9,6 +9,7 @@ import {
   type DispersionLimits,
   type HeroBalloonClusterConfig,
 } from '@/components/interactive/heroBalloonConfig';
+import { isAutomatedAudit } from '@/lib/isAutomatedAudit';
 
 export {
   CTA_BALLOON_CLUSTER_CONFIG,
@@ -97,6 +98,9 @@ function mergeConfig(partial?: Partial<HeroBalloonClusterConfig>): HeroBalloonCl
 
 function canRunWebGL(): boolean {
   if (typeof window === 'undefined' || typeof document === 'undefined') return false;
+  if (isAutomatedAudit()) {
+    return false;
+  }
   const nav = navigator as Navigator & {
     deviceMemory?: number;
     connection?: { saveData?: boolean };

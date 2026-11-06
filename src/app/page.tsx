@@ -7,9 +7,7 @@ import Services from '@/components/sections/Services';
 import About from '@/components/sections/About';
 import Process from '@/components/sections/Process';
 import FinalCTA from '@/components/sections/FinalCTA';
-import DoorPreloader from '@/components/interactive/DoorPreloader';
-import BalloonCursor from '@/components/interactive/BalloonCursor';
-import MotionDirector from '@/components/motion/MotionDirector';
+import ClientInteractions from '@/components/interactive/ClientInteractions';
 
 export default function Home() {
   return (
@@ -28,9 +26,7 @@ export default function Home() {
         </main>
         <Footer />
       </div>
-      <DoorPreloader />
-      <BalloonCursor />
-      <MotionDirector />
+      <ClientInteractions />
     </>
   );
 }

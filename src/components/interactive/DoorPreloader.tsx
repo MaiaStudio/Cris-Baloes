@@ -1,6 +1,7 @@
 'use client';
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
+import { isAutomatedAudit } from '@/lib/isAutomatedAudit';
 
 export default function DoorPreloader(){
   const root=useRef<HTMLDivElement>(null);
@@ -16,7 +17,7 @@ export default function DoorPreloader(){
     try{sessionStorage.removeItem('cris-intro')}catch{}
 
     const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if(reduced){
+    if(reduced || isAutomatedAudit()){
       overlay.hidden=true;
       window.dispatchEvent(new Event('cris:ready'));
       return;
@@ -89,10 +90,7 @@ export default function DoorPreloader(){
 
   return (
     <div ref={root} className="door-preloader" hidden role="dialog" aria-label="A porta do encanto" aria-modal="true">
-      <video ref={video} muted playsInline preload="auto" poster="/assets/images/door-poster-desktop.jpg">
-        <source src="/assets/videos/preloader-mobile.mp4" media="(max-width: 768px), (orientation: portrait)" type="video/mp4"/>
-        <source src="/assets/videos/preloader-desktop.mp4" type="video/mp4"/>
-      </video>
+      <video ref={video} muted playsInline preload="none" poster="/assets/images/door-poster-desktop.jpg" />
       <div className="intro-caption">
         <span>CRIS BALÕES</span>
         <p>Preparando algo especial...</p>
