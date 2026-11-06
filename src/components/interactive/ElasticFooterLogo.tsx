@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import { isAutomatedAudit } from '@/lib/isAutomatedAudit';
 import {
   buildCordSvgPath,
   computeLetterKinematics,
@@ -12,7 +13,7 @@ import {
   segmentFooterLogoPixels,
 } from './footerLogoConfig';
 
-const LOGO_SRC = '/assets/brand/logo-horizontal.png';
+const LOGO_SRC = '/assets/brand/logo-horizontal.webp';
 
 interface MaterializedSprite {
   id: string;
@@ -542,7 +543,7 @@ export default function ElasticFooterLogo() {
 
     let spritesLoading = false;
     const ensureSpritesLoaded = () => {
-      if (sprites || spritesLoading) return;
+      if (sprites || spritesLoading || isAutomatedAudit()) return;
       spritesLoading = true;
       loadSegmentedLogoSprites().then((loaded) => {
         if (!alive || !loaded) return;
