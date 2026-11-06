@@ -735,22 +735,23 @@ export default function HeroBalloonCluster3D({
         return;
       }
 
-      animationFrameId = requestAnimationFrame(simulateAndRender);
-      loopRunning = true;
-
-      const now = performance.now();
-      const rawDelta = Math.min((now - lastNow) / 1000, 0.05);
-      lastNow = now;
-
       // Hold simulation quietly until preloader opens, keeping Frame 1 ready
       if (!entranceStarted) {
         if (!isPreloaderBlocking()) {
           entranceStarted = true;
           entranceStartTime = simTime;
         } else {
+          loopRunning = false;
           return;
         }
       }
+
+      animationFrameId = requestAnimationFrame(simulateAndRender);
+      loopRunning = true;
+
+      const now = performance.now();
+      const rawDelta = Math.min((now - lastNow) / 1000, 0.05);
+      lastNow = now;
 
       simTime += rawDelta;
       const dtStep = rawDelta * 60; // 1.0 at 60Hz, 0.5 at 120Hz

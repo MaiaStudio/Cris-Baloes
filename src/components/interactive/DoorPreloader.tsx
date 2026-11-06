@@ -14,11 +14,9 @@ export default function DoorPreloader(){
     const media=video.current;
     if(!overlay||!media)return;
 
-    try{sessionStorage.removeItem('cris-intro')}catch{}
-
-    const reduced=matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if(reduced || isAutomatedAudit()){
-      overlay.hidden=true;
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    if (reduced || isAutomatedAudit()) {
+      overlay.hidden = true;
       window.dispatchEvent(new Event('cris:ready'));
       return;
     }
@@ -53,7 +51,10 @@ export default function DoorPreloader(){
     };
 
     finishRef.current=finish;
-    const timer=setTimeout(finish,3400);
+    const timer=setTimeout(finish,1800);
+    const onSkip = () => finish();
+    overlay.addEventListener('click', onSkip, { once: true });
+    window.addEventListener('keydown', onSkip, { once: true });
 
     const isMobile=window.matchMedia('(max-width: 768px), (orientation: portrait) and (max-width: 1024px)').matches;
     const videoSrc=isMobile?'/assets/videos/preloader-mobile.mp4':'/assets/videos/preloader-desktop.mp4';
