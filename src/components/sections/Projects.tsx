@@ -1,0 +1,7 @@
+'use client';
+import { useState } from 'react';
+import { MoveUpRight } from 'lucide-react';
+import ProjectRevealCard from '@/components/interactive/ProjectRevealCard';
+import {projects} from '@/data/projects';
+const filters=['Todos','Eventos sociais','Eventos corporativos'] as const;
+export default function Projects(){const [filter,setFilter]=useState<string>('Todos');const filtered=projects.filter(p=>filter==='Todos'||p.category===filter);return <section className="projects section-pad" id="projetos"><div className="section-heading" data-reveal><div><h2>Imagine o que<br/>podemos <em>criar juntos.</em></h2></div><p>De grandes eventos corporativos a celebrações cheias de significado, cada projeto é uma oportunidade de transformar o extraordinário em realidade.</p></div><div className="portfolio-toolbar"><div className="project-filters" aria-label="Filtrar projetos">{filters.map(f=><button key={f} onClick={()=>setFilter(f)} aria-pressed={filter===f}>{f}{f==='Todos'&&<sup>04</sup>}</button>)}</div><span className="reveal-instruction"><MoveUpRight size={14}/><span className="desktop-hint">Passe o mouse para revelar a transformação</span><span className="touch-hint">Toque para revelar a transformação</span></span></div><p className="sr-only" role="status">{filtered.length} projetos exibidos</p><div className="project-grid" key={filter}>{filtered.map((project,index)=><ProjectRevealCard key={project.id} project={project} index={index}/>)}</div></section>}

@@ -1,0 +1,9 @@
+node_modules/
+.next/
+out/
+.env*.local
+*.tsbuildinfo
+.npm-cache/
+docs/*-registry.json
+.vercel/
+.agent/

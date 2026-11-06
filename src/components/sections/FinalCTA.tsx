@@ -1,0 +1,4 @@
+import { ArrowUpRight } from 'lucide-react';
+import {brand,contactHref} from '@/data/content';
+import HeroBalloonCluster3D, { CTA_BALLOON_CLUSTER_CONFIG } from '@/components/interactive/HeroBalloonCluster3D';
+export default function FinalCTA(){return <section className="final-cta section-pad" id="contato"><h2 data-reveal>Vamos criar algo<br/><em>inesquecível?</em></h2><p>Toda grande experiência começa com uma ideia.<br/>Conte a sua para nós.</p>{brand.whatsapp?<a className="button button-dark" href={contactHref} target="_blank" rel="noopener noreferrer">Quero transformar meu evento <ArrowUpRight size={19}/></a>:<p>Nosso canal de atendimento será disponibilizado em breve.</p>}<HeroBalloonCluster3D config={CTA_BALLOON_CLUSTER_CONFIG} className="cta-balloon-cluster" smallFallback/><span className="cta-spark" aria-hidden="true">✳</span></section>}

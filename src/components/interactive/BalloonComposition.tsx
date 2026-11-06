@@ -1,0 +1,10 @@
+// Code-native ornament: deliberately independent from the unaltered project photographs.
+export default function BalloonComposition({small=false}:{small?:boolean}){
+  return <svg className={small?'balloon-composition balloon-small':'balloon-composition'} viewBox="0 0 550 650" fill="none" aria-hidden="true">
+    <defs>{[['pearl','#fffcf4','#d8cbb8'],['coral',small?'#7eb0c4':'#f09b84',small?'#467285':'#b5513a'],['gold','#f5cd64','#b58124'],['lilac','#d2b0e3','#8960a3'],['blue',small?'#cf1f2e':'#9ac3d4',small?'#881018':'#467285']].map(([id,a,b])=><radialGradient key={id} id={`${small?'s-':''}${id}`} cx="30%" cy="24%" r="78%"><stop stopColor={a}/><stop offset=".48" stopColor={a}/><stop offset="1" stopColor={b}/></radialGradient>)}</defs>
+    <g className="balloon-group balloon-back"><ellipse cx="367" cy="183" rx="81" ry="88" fill={`url(#${small?'s-':''}pearl)`}/><ellipse cx="441" cy="286" rx="78" ry="85" fill={`url(#${small?'s-':''}gold)`}/><ellipse cx="287" cy="271" rx="89" ry="93" fill={`url(#${small?'s-':''}lilac)`}/><ellipse cx="398" cy="398" rx="82" ry="89" fill={`url(#${small?'s-':''}blue)`}/></g>
+    <g className="balloon-group balloon-front"><ellipse cx="210" cy="185" rx="74" ry="81" fill={`url(#${small?'s-':''}coral)`}/><ellipse cx="164" cy="312" rx="87" ry="93" fill={`url(#${small?'s-':''}pearl)`}/><ellipse cx="299" cy="390" rx="96" ry="103" fill={`url(#${small?'s-':''}coral)`}/><ellipse cx="185" cy="445" rx="64" ry="69" fill={`url(#${small?'s-':''}gold)`}/><ellipse cx="360" cy="512" rx="60" ry="65" fill={`url(#${small?'s-':''}pearl)`}/><ellipse cx="286" cy="535" rx="37" ry="41" fill={`url(#${small?'s-':''}lilac)`}/><ellipse cx="101" cy="422" rx="32" ry="36" fill={`url(#${small?'s-':''}coral)`}/><ellipse cx="432" cy="477" rx="28" ry="31" fill={`url(#${small?'s-':''}gold)`}/></g>
+    <g stroke="#fff" strokeWidth="6" strokeLinecap="round" opacity=".52"><path d="M172 152q5-20 23-25"/><path d="M120 277q8-23 27-29"/><path d="M245 344q11-20 31-25"/><path d="M401 250q7-20 22-24"/></g>
+    <path d="M281 577l-5 10h12z" fill="#9d80b1"/><path d="M282 587c20 24-24 31-5 56" stroke="#a99491" strokeWidth="1.2"/>
+  </svg>
+}
